@@ -1,4 +1,9 @@
 import React, { Component } from 'react';
+import { ControlLabel, FormGroup } from 'react-bootstrap';
+
+import SimulatorInput from './SimulatorInput.js';
+
+import './Simulator.css';
 
 const MAX_GAMES_ALLOWED = 5000;
 
@@ -110,7 +115,14 @@ class Simulator extends Component {
 
   render() {
     return (
-        <div />
+        <form>
+          <FormGroup>
+            <SimulatorInput label={"Starting Rank"} />
+            <SimulatorInput label={"Starting Stars"} />
+            <SimulatorInput label={"Win Rate (%)"} />
+            <SimulatorInput label={"Max Games"} />
+          </FormGroup>
+        </form>
     );
   }
 }

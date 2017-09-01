@@ -1,4 +1,8 @@
-.App {
+.App-body {
+  padding: 10px;
+}
+
+.App-header {
   text-align: center;
 }
 
