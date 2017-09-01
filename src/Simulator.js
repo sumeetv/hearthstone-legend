@@ -1,6 +1,4 @@
-import React, { Component } from 'react';
-import { ControlLabel, FormGroup } from 'react-bootstrap';
-
+import React, { Component } from 'react'; 
 import SimulatorInput from './SimulatorInput.js';
 
 import './Simulator.css';
@@ -8,11 +6,13 @@ import './Simulator.css';
 const MAX_GAMES_ALLOWED = 5000;
 
 class Simulator extends Component {
-
-  getInitialState() {
-    return {
-      currentRank: 25,
-      currentStars: 0
+  constructor(props) {
+    super(props);
+    this.state = {
+      initialRank: 25,
+      initialStars: 0,
+      initialWinRate: 50,
+      maxGames: MAX_GAMES_ALLOWED
     }
   }
 
@@ -113,16 +113,85 @@ class Simulator extends Component {
     return successfulRuns;
   }
 
+  handleRankChange(e) {
+    this.setState({
+      initialRank: e.target.value
+    });
+  }
+
+  validateRank() {
+    if (this.state.initialRank <= 25 && this.state.initialRank > 0) {
+      return 'success';
+    }
+    return 'error';
+  }
+
+  handleStarsChange(e) {
+    this.setState({
+      initialStars: e.target.value
+    });
+  }
+
+  validateStars() {
+    if (this.validateRank() === 'error') {
+      return 'error';
+    }
+    if ((this.state.initialStars >= 0) &&
+        (this.state.initialStars <= this.getStarsForRank(this.state.initialRank))) {
+      return 'success';
+    }
+    return 'error';
+  }
+
+  handleWinRateChange(e) {
+    this.setState({
+      initialWinRate: e.target.value
+    });
+  }
+
+  validateWinRate() {
+    if (this.state.initialWinRate >= 0 && this.state.initialWinRate <= 100) {
+      return 'success';
+    }
+    return 'error';
+  }
+
+  handleMaxGamesChange(e) {
+    this.setState({
+      maxGames: e.target.value
+    });
+  }
+
+  validateMaxGames() {
+    if (this.state.maxGames >=1) {
+      return 'success';
+    }
+    return 'error';
+  }
+
   render() {
     return (
-        <form>
-          <FormGroup>
-            <SimulatorInput label={"Starting Rank"} />
-            <SimulatorInput label={"Starting Stars"} />
-            <SimulatorInput label={"Win Rate (%)"} />
-            <SimulatorInput label={"Max Games"} />
-          </FormGroup>
-        </form>
+      <div className="Simulator-form">
+        <SimulatorInput
+          label={"Starting Rank"}
+          value={this.state.initialRank}
+          handleChange={this.handleRankChange.bind(this)} 
+          getValidationState={this.validateRank()} />
+        <SimulatorInput
+          label={"Starting Stars"}
+          value={this.state.initialStars}
+          handleChange={this.handleStarsChange.bind(this)}
+          getValidationState={this.validateStars()} />
+        <SimulatorInput
+          label={"Win Rate (%)"}
+          value={this.state.initialWinRate}
+          handleChange={this.handleWinRateChange.bind(this)}
+          getValidationState={this.validateWinRate()} />
+        <SimulatorInput
+          label={"Max Games"}
+          value={this.state.maxGames}
+          handleChange={this.handleMaxGamesChange.bind(this)} />
+      </div>
     );
   }
 }
