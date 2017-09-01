@@ -11,5 +11,9 @@
 }
 
 .Simulator-input {
-  max-width: 50px;
+  max-width: 70px;
+}
+
+.Simulator-results {
+  padding-top: 10px;
 }

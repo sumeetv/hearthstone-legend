@@ -1,18 +1,23 @@
 import React, { Component } from 'react'; 
+import { Button } from 'react-bootstrap';
+
 import SimulatorInput from './SimulatorInput.js';
 
 import './Simulator.css';
 
 const MAX_GAMES_ALLOWED = 5000;
+const MAX_RUNS_ALLOWED = 500;
 
 class Simulator extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      averageRun: 0,
       initialRank: 25,
       initialStars: 0,
       initialWinRate: 50,
-      maxGames: MAX_GAMES_ALLOWED
+      maxGames: MAX_GAMES_ALLOWED,
+      numSuccessfulRuns: 0,
     }
   }
 
@@ -48,27 +53,33 @@ class Simulator extends Component {
     return false;
   }
 
-  runSimulation(win_rate) {
-    if (win_rate > 1 || win_rate < 0) {
-      throw new Error("Please enter a valid win rate: " + win_rate);
+  runSimulation() {
+    if (this.validateRank() === 'error' ||
+        this.validateStars() === 'error' ||
+        this.validateWinRate() === 'error' ||
+        this.validateMaxGames() === 'error') {
+      throw new Error("Please enter valid inputs");
     }
 
-    const numRuns = 100;
+    const numRuns = MAX_RUNS_ALLOWED;
+    const maxGames = this.state.maxGames;
+    const winRate = this.state.initialWinRate / 100;
+
     let successfulRuns = [];
 
     for (let curRun = 0; curRun < numRuns; curRun++) {
-      let currentRank = 25;
-      let currentStars = 0;
+      let currentRank = this.state.initialRank;
+      let currentStars = this.state.initialStars;
       let mostRecentGames = [false, false];
       let gamesPlayed;
 
-      for (gamesPlayed = 0; gamesPlayed < MAX_GAMES_ALLOWED; gamesPlayed++) {
+      for (gamesPlayed = 0; gamesPlayed < maxGames; gamesPlayed++) {
         // We've hit legend!
         if (currentRank === 0) {
           break;
         }
 
-        let wonCurrentGame = Math.random() < win_rate;
+        let wonCurrentGame = Math.random() < winRate;
 
         // We've won, so let's rank up and get our stars
         if (wonCurrentGame) {
@@ -110,7 +121,15 @@ class Simulator extends Component {
       }
     }
 
-    return successfulRuns;
+    if (successfulRuns.length > 0) {
+      let total = successfulRuns.reduce(function(sum, value) {
+        return sum + value;
+      }, 0);
+      this.setState({
+        averageRun: total / successfulRuns.length,
+        numSuccessfulRuns: successfulRuns.length,
+      });
+    }
   }
 
   handleRankChange(e) {
@@ -171,26 +190,41 @@ class Simulator extends Component {
 
   render() {
     return (
-      <div className="Simulator-form">
-        <SimulatorInput
-          label={"Starting Rank"}
-          value={this.state.initialRank}
-          handleChange={this.handleRankChange.bind(this)} 
-          getValidationState={this.validateRank()} />
-        <SimulatorInput
-          label={"Starting Stars"}
-          value={this.state.initialStars}
-          handleChange={this.handleStarsChange.bind(this)}
-          getValidationState={this.validateStars()} />
-        <SimulatorInput
-          label={"Win Rate (%)"}
-          value={this.state.initialWinRate}
-          handleChange={this.handleWinRateChange.bind(this)}
-          getValidationState={this.validateWinRate()} />
-        <SimulatorInput
-          label={"Max Games"}
-          value={this.state.maxGames}
-          handleChange={this.handleMaxGamesChange.bind(this)} />
+      <div>
+        <div className="Simulator-form">
+          <SimulatorInput
+            label={"Starting Rank"}
+            value={this.state.initialRank}
+            handleChange={this.handleRankChange.bind(this)} 
+            getValidationState={this.validateRank()} />
+          <SimulatorInput
+            label={"Starting Stars"}
+            value={this.state.initialStars}
+            handleChange={this.handleStarsChange.bind(this)}
+            getValidationState={this.validateStars()} />
+          <SimulatorInput
+            label={"Win Rate (%)"}
+            value={this.state.initialWinRate}
+            handleChange={this.handleWinRateChange.bind(this)}
+            getValidationState={this.validateWinRate()} />
+          <SimulatorInput
+            label={"Max Games"}
+            value={this.state.maxGames}
+            handleChange={this.handleMaxGamesChange.bind(this)} />
+          <Button bsStyle="primary" onClick={this.runSimulation.bind(this)}>
+            {"Generate Ranked Runs"}
+          </Button>
+        </div>
+        <div className="Simulator-results">
+          <p>
+            {"Game results: "}
+            {this.state.averageRun}
+          </p>
+          <p>
+            {"Successful runs: "}
+            {this.state.numSuccessfulRuns}
+          </p>
+        </div>
       </div>
     );
   }
